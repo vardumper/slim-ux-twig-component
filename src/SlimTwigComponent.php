@@ -12,14 +12,14 @@ use Vardumper\SlimTwigComponent\Twig\SlimTwigComponentRuntime;
 
 final class SlimTwigComponent
 {
-    private const DEFAULT_NAMESPACES = [
-        'HtmlTwigComponent' => __DIR__ . '/../../../vendor/vardumper/html5-twig-component-bundle/src/Resources',
+     private const DEFAULT_NAMESPACES = [
+        'HtmlTwigComponent' => __DIR__ . '/../../html5-twig-component-bundle/src/Resources',
     ];
 
     private const DEFAULT_COMPONENT_PATHS = [
-        __DIR__ . '/../../../vendor/vardumper/html5-twig-component-bundle/src/Twig',
+        __DIR__ . '/../../html5-twig-component-bundle/src/Twig',
     ];
-
+    
     /**
      * Register Twig Components with the given Twig environment.
      *
