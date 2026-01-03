@@ -60,7 +60,7 @@ Now inside your Twig templates you can render components:
 <twig:Alert type="success" message="Super duper!" />
 ```
 
-Besides from strings, you can also pass objects and arrays to Twig Components. Learn more about Twig Components in the [Symfony Documenatation](https://symfony.com/bundles/ux-twig-component/current/index.html#component-html-syntax).
+Besides from strings, you can also pass objects and arrays to Twig Components. Learn more about Twig Components in the [Symfony Documentation](https://symfony.com/bundles/ux-twig-component/current/index.html#component-html-syntax).
 ```twig
 <twig:Alert :object='{ "key": "value" }' />
 ```
