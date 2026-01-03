@@ -47,8 +47,8 @@ Alternatively provide more namespacePaths, for the Runtime to look in. eg: `@Add
 
 ## Features
 
--✅ Works with Slim 4+
--✅ Pre-made, fully type-safe Twig Components for all HTML5 elements included
--✅ Support class-based and anonymous Twig Components
--✅ Supports `<twig:Alert type="success" />` syntax
--✅ Supports `{{ component('Alert', { type: 'success'}) }}` syntax
+ - ✅ Works with Slim 4+
+ - ✅ Pre-made, fully type-safe Twig Components for all HTML5 elements included
+ - ✅ Support class-based and anonymous Twig Components
+ - ✅ Supports `<twig:Alert type="success" />` syntax
+ - ✅ Supports `{{ component('Alert', { type: 'success'}) }}` syntax
