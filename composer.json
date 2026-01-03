@@ -4,7 +4,7 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.4",
         "slim/slim": "^4.0",
         "slim/twig-view": "^3.0",
         "symfony/ux-twig-component": "^2.31",
