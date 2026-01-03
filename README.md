@@ -1,17 +1,16 @@
 # Slim UX Twig Component
 
 A small integration to make building and using **[Twig Components](https://symfony.com/bundles/ux-twig-component/current/index.html)** easy in Slim Framework. It provides a custom Runtime and allows configuration of component paths as well as passing in more Twig namespaces/paths. As a caveat, installing this package, does pull in a number of Symfony packages.
-It also adds `vardumper/extended-htmldocument` which adds improved HTML5 support to PHP - used for HTML5 attribute validation via Immutable Attribute Enums when using the Twig Components included in this Slim package (for example `<twig:A href="#" role="button">`). 
-It also adds `vardumper/html5-twig-component-bundle` which holds these pre-made Twig Components for all HTML5 elements.   
+Makes use of [`vardumper/extended-htmldocument`](https://github.com/vardumper/extended-htmldocument) which adds improved HTML5 support to PHP - used for HTML5 attribute validation via Immutable Attribute Enums when using the pre-built Twig Components that are included in this package (for example `<twig:A href="#" role="button">Inline Button</twig:A>`). 
+Also uses [`vardumper/html5-twig-component-bundle`](https://github.com/vardumper/html5-twig-component-bundle) which holds these pre-built Twig Components for all HTML5 elements.   
 
 ## Features
 
- - ✅ Works with Slim 4+ with and without DI Container
- - ✅ Includes pre-made Twig Components for all HTML5 elements that are fully typesafe and support Alpine.js, ARIA, WCAG and HTML Living Standards.
- - ✅ Supports class-based as well as anonymous Twig Components
- - ✅ Supports `<twig:Alert type="success" />` syntax
- - ✅ Supports `{{ component('Alert', { type: 'success'}) }}` syntax
- - ✅ Supports `{{ component 'Alert' with { type: 'success'} }}` syntax
+ - Works with Slim 4+ with and without DI Container
+ - Includes pre-made Twig Components for all HTML5 elements that are fully typesafe and support Alpine.js, ARIA, WCAG and HTML Living Standards.
+ - Supports class-based as well as anonymous Twig Components
+ - Supports `<twig:Alert type="success" />`, `{{ component('Alert', { type: 'success'}) }}` and
+ `{{ component 'Alert' with { type: 'success'} }}` syntaxes
 
 
 ## Requirements
@@ -48,6 +47,9 @@ SlimTwigComponent::register(
 );
 ```
 
+By default, only Twig's main namepsace (usually a `templates/` or `view/` folder) is registered by the SlimTwigComponent class. Internally, the paths for the pre-made HTML5 Twig Components are registered. 
+Use the optional `$namespacePaths` and `$componentPaths` to provide an array of additional folders and namespaces.
+
 You can now add Anonymous components inside `templates/components`. For example: add an `Alert.html.twig` file:
 ```twig
 <twig:Span class="alert alert-{{ type|default('success') }}">{{ message }}</twig:Span>
@@ -61,7 +63,7 @@ Now inside your Twig templates you can render components:
 <twig:Alert type="success" message="Super duper!" />
 ```
 
-Besides from strings, you can also pass objects and arrays to Twig Components. Learn more [here](https://symfony.com/bundles/ux-twig-component/current/index.html#component-html-syntax).
+Besides from strings, you can also pass objects and arrays to Twig Components. Learn more about Twig Components in the [Symfony Documentation](https://symfony.com/bundles/ux-twig-component/current/index.html#component-html-syntax).
 ```twig
 <twig:Alert :object='{ "key": "value" }' />
 ```
