@@ -41,3 +41,11 @@ Now inside your Twig templates you can render components:
 
 This will look for a component class like `App\Twig\Component\Alert` and render the corresponding template (which either exists in your default namespace eg: `templates/components/Alert.html.twig`.
 Alternatively provide more namespacePaths, for the Runtime to look in. eg: `@AdditionalNamespace/components/Alert.html.twig`.
+
+## Features
+
+✅ Works with Slim 4+
+✅ Pre-made, fully type-safe Twig Components for all HTML5 elements included
+✅ Support class-based and anonymous Twig Components
+✅ Supports `<twig:Alert type="success" />` syntax
+✅ Supports `{{ component('Alert', { type: 'success'}) }}` syntax
