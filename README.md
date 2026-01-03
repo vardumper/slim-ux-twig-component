@@ -45,7 +45,9 @@ SlimTwigComponent::register(
     ],
 );
 ```
-By default, only Twig's main namepsace (for example templates/ folder) is registered and only the pre-made HTML5 Twig Components are set-up. Use the optional `$namespacePaths` and `$componentPaths` arrays to register more folders.
+
+By default, only Twig's main namepsace (usually a `templates/` or `view/` folder) is registered by the SlimTwigComponent class. Internally, the paths for the pre-made HTML5 Twig Components are registered. 
+Use the optional `$namespacePaths` and `$componentPaths` to provide an array of additional folders and namespaces.
 
 You can now add Anonymous components inside `templates/components`. For example: add an `Alert.html.twig` file:
 ```twig
