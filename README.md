@@ -9,7 +9,8 @@ Also uses [`vardumper/html5-twig-component-bundle`](https://github.com/vardumper
  - Works with Slim 4+ with and without DI Container
  - Includes pre-made Twig Components for all HTML5 elements that are fully typesafe and support Alpine.js, ARIA, WCAG and HTML Living Standards.
  - Supports class-based as well as anonymous Twig Components
- - Supports `<twig:Alert type="success" />`, `{{ component('Alert', { type: 'success'}) }}` and `{{ component 'Alert' with { type: 'success'} }}` syntaxes
+ - Supports `<twig:Alert type="success" />`, `{{ component('Alert', { type: 'success'}) }}` and
+ `{{ component 'Alert' with { type: 'success'} }}` syntaxes
 
 
 ## Requirements
