@@ -1,3 +1,6 @@
+[![Latest Stable Version](https://poser.pugx.org/vardumper/slim-ux-twig-component/v/stable)](https://packagist.org/packages/vardumper/slim-ux-twig-component)
+[![Total Downloads](https://poser.pugx.org/vardumper/slim-ux-twig-component/downloads)](https://packagist.org/packages/vardumper/slim-ux-twig-component) 
+
 # Slim UX Twig Component
 
 A small integration to make building and using **[Twig Components](https://symfony.com/bundles/ux-twig-component/current/index.html)** easy in Slim Framework. It provides a custom Runtime and allows configuration of component paths as well as passing in more Twig namespaces/paths. As a caveat, installing this package, does pull in a number of Symfony packages.
