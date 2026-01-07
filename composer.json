@@ -5,11 +5,11 @@
     "license": "MIT",
     "require": {
         "php": ">=8.4",
-        "slim/slim": "^4.0",
-        "slim/twig-view": "^3.0",
-        "symfony/ux-twig-component": "^2.31",
+        "slim/slim": "^4.15.1",
+        "slim/twig-view": "^3.4.1",
+        "symfony/ux-twig-component": "^2.32",
         "symfony/options-resolver": "^5.4|^6.0|^7.0|^8.0",
-        "vardumper/html5-twig-component-bundle": "^0.2.0"
+        "vardumper/html5-twig-component-bundle": "^0.2.74"
     },
     "autoload": {
         "psr-4": {
