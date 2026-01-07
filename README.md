@@ -1,5 +1,6 @@
 [![Latest Stable Version](https://poser.pugx.org/vardumper/slim-ux-twig-component/v/stable)](https://packagist.org/packages/vardumper/slim-ux-twig-component)
 [![Total Downloads](https://poser.pugx.org/vardumper/slim-ux-twig-component/downloads)](https://packagist.org/packages/vardumper/slim-ux-twig-component) 
+[![Vulnerabilities for slim-ux-twig-component](https://dtrack.erikpoehler.us/api/v1/badge/vulns/project/4d0cd6c8-6c59-4d4a-8096-b503045a06b9?apiKey=odt_J5OKz9JcWpKAnqz80whxTvwA3oQjGBGy)](https://dtrack.erikpoehler.us/projects/4d0cd6c8-6c59-4d4a-8096-b503045a06b9)
 
 # Slim UX Twig Component
 
