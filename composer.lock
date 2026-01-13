@@ -3292,16 +3292,16 @@
         },
         {
             "name": "vardumper/extended-htmldocument",
-            "version": "0.2.74",
+            "version": "0.2.77",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vardumper/extended-htmldocument.git",
-                "reference": "1528c7585fba034738b9617bd5f756a3bcb0256c"
+                "reference": "fee2c39c43768eb6f2bf19f06e6ee544bd6e5f87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vardumper/extended-htmldocument/zipball/1528c7585fba034738b9617bd5f756a3bcb0256c",
-                "reference": "1528c7585fba034738b9617bd5f756a3bcb0256c",
+                "url": "https://api.github.com/repos/vardumper/extended-htmldocument/zipball/fee2c39c43768eb6f2bf19f06e6ee544bd6e5f87",
+                "reference": "fee2c39c43768eb6f2bf19f06e6ee544bd6e5f87",
                 "shasum": ""
             },
             "require": {
@@ -3315,15 +3315,15 @@
                 "amphp/file": ">=3.2",
                 "brainmaestro/composer-git-hooks": "dev-master",
                 "edent/pretty-print-html": "2025-04-18",
-                "friendsofphp/php-cs-fixer": "^3.92.3",
+                "friendsofphp/php-cs-fixer": "^3.92.4",
                 "pestphp/pest": "^3.8.4",
                 "pestphp/pest-plugin-drift": "^3.0",
                 "pestphp/pest-plugin-type-coverage": "^3.6.1",
                 "phpmd/phpmd": "^2.15",
                 "phpstan/phpstan": "^2.1.33",
-                "rector/swiss-knife": "^2.3.3",
-                "symfony/http-kernel": "^5.4|^6.0|^7.0|^8.0.2",
-                "symfony/ux-twig-component": "^2.31",
+                "rector/swiss-knife": "^2.3.4",
+                "symfony/http-kernel": "^5.4|^6.0|^7.0|^8.0.3",
+                "symfony/ux-twig-component": "^2.32",
                 "symplify/easy-coding-standard": "^12.6.2"
             },
             "suggest": {
@@ -3395,20 +3395,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-01-03T13:09:15+00:00"
+            "time": "2026-01-07T11:46:24+00:00"
         },
         {
             "name": "vardumper/html5-twig-component-bundle",
-            "version": "0.2.74",
+            "version": "0.2.77",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vardumper/html5-twig-component-bundle.git",
-                "reference": "ab5b68374faf65bc169c6bde0b066e561cfefbd2"
+                "reference": "1a9a4b5582074e594fd76d7b8ea4cb6c6aba7c1d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vardumper/html5-twig-component-bundle/zipball/ab5b68374faf65bc169c6bde0b066e561cfefbd2",
-                "reference": "ab5b68374faf65bc169c6bde0b066e561cfefbd2",
+                "url": "https://api.github.com/repos/vardumper/html5-twig-component-bundle/zipball/1a9a4b5582074e594fd76d7b8ea4cb6c6aba7c1d",
+                "reference": "1a9a4b5582074e594fd76d7b8ea4cb6c6aba7c1d",
                 "shasum": ""
             },
             "require": {
@@ -3449,7 +3449,7 @@
                 "twig"
             ],
             "support": {
-                "source": "https://github.com/vardumper/html5-twig-component-bundle/tree/0.2.74"
+                "source": "https://github.com/vardumper/html5-twig-component-bundle/tree/0.2.77"
             },
             "funding": [
                 {
@@ -3465,7 +3465,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-01-03T13:08:27+00:00"
+            "time": "2026-01-07T11:46:20+00:00"
         }
     ],
     "packages-dev": [],
@@ -3478,5 +3478,5 @@
         "php": ">=8.4"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }
