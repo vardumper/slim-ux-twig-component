@@ -37,6 +37,7 @@ Also uses [`vardumper/html5-twig-component-bundle`](https://github.com/vardumper
 
 ## Requirements
  - PHP 8.4+
+ - `slim/slim` 4+
  - `slim/twig-view` for Twig Rendering
 
 ## Installation
