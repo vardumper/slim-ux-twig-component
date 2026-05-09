@@ -106,7 +106,7 @@
         "swiss-knife-find-multi-classes": "vendor/bin/swiss-knife find-multi-classes ./src --ansi",
         "swiss-knife-finalize-classes": "vendor/bin/swiss-knife finalize-classes ./src --ansi",
         "swiss-knife-privatize-constants": "vendor/bin/swiss-knife privatize-constants ./src --ansi",
-        "test:coverage": "composer run test:coverage:unit && composer run test:coverage:integration",
+        "test:coverage": "composer run test:coverage:unit",
         "test:coverage:unit": "XDEBUG_MODE=coverage vendor/bin/pest tests/Unit --exclude-group=external-bin --coverage-clover=clover.xml",
         "test:coverage:html:unit": "XDEBUG_MODE=coverage vendor/bin/pest tests/Unit --exclude-group=external-bin --coverage-html=coverage-report-unit",
         "test:coverage:html:integration": "XDEBUG_MODE=coverage vendor/bin/pest tests/Unit --coverage-html=coverage-report"

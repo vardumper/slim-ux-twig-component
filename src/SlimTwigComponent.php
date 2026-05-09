@@ -12,28 +12,31 @@ use Vardumper\SlimTwigComponent\Twig\SlimTwigComponentRuntime;
 
 final class SlimTwigComponent
 {
-     private const DEFAULT_NAMESPACES = [
+    private const DEFAULT_NAMESPACES = [
         'HtmlTwigComponent' => __DIR__ . '/../../html5-twig-component-bundle/src/Resources',
     ];
 
     private const DEFAULT_COMPONENT_PATHS = [
         __DIR__ . '/../../html5-twig-component-bundle/src/Twig',
     ];
-    
+
     /**
      * Register Twig Components with the given Twig environment.
      *
      * provide optional $namespacePaths to lookup twig files or anonymous components.
      * provide optional $componentPaths to lookup class-based components.
+     *
+     * @param array<string,string> $namespacePaths
+     * @param list<string> $componentPaths
      */
     public static function register(Twig $twig, array $namespacePaths = [], array $componentPaths = []): void
     {
         $env = $twig->getEnvironment();
+        $allNamespacePaths = array_merge(self::DEFAULT_NAMESPACES, $namespacePaths);
 
         // Register default template namespaces and append any additional namespaces passed in
         $loader = $env->getLoader();
         if ($loader instanceof \Twig\Loader\FilesystemLoader) {
-            $allNamespacePaths = array_merge(self::DEFAULT_NAMESPACES, $namespacePaths);
             foreach ($allNamespacePaths as $ns => $path) {
                 if (is_dir($path)) {
                     $loader->addPath($path, $ns);

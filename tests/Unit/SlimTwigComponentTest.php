@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Slim\Views\Twig;
 use Symfony\UX\TwigComponent\Twig\ComponentExtension;
 use Symfony\UX\TwigComponent\Twig\ComponentRuntime;
+use Twig\Loader\ArrayLoader;
 use Twig\Loader\FilesystemLoader;
 use Vardumper\SlimTwigComponent\SlimTwigComponent;
 
@@ -45,4 +46,15 @@ it('registers component support on the twig environment', function (): void {
     expect($runtime->render('Badge', [
         'message' => 'World',
     ]))->toBe('Hello World');
+});
+
+it('registers without filesystem loader and still exposes runtime', function (): void {
+    $twig = new Twig(new ArrayLoader([]));
+
+    SlimTwigComponent::register($twig);
+
+    $environment = $twig->getEnvironment();
+
+    expect($environment->hasExtension(ComponentExtension::class))->toBeTrue();
+    expect($environment->getRuntime(ComponentRuntime::class))->toBeObject();
 });

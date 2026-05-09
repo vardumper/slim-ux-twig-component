@@ -3,26 +3,39 @@ declare(strict_types=1);
 
 namespace Vardumper\SlimTwigComponent\Twig;
 
-use Symfony\UX\TwigComponent\Event\PreRenderEvent;
-use Symfony\UX\TwigComponent\ComponentMetadata;
-use Symfony\UX\TwigComponent\MountedComponent;
-use Symfony\UX\TwigComponent\ComponentAttributes;
-use Symfony\UX\TwigComponent\ComputedPropertiesProxy;
-use Symfony\UX\TwigComponent\Attribute\PreMount as PreMountAttr;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
+use Symfony\UX\TwigComponent\Attribute\PreMount as PreMountAttr;
+use Symfony\UX\TwigComponent\ComponentAttributes;
+use Symfony\UX\TwigComponent\ComponentMetadata;
+use Symfony\UX\TwigComponent\ComputedPropertiesProxy;
+use Symfony\UX\TwigComponent\Event\PreRenderEvent;
+use Symfony\UX\TwigComponent\MountedComponent;
 use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 use Twig\Runtime\EscaperRuntime;
 
 final class SlimTwigComponentRuntime
 {
+    /**
+     * @var list<string>
+     */
+    public array $componentPaths = [];
+
     private Environment $twig;
-    /** @var array<string,array{class:string,template:string,pre_mount:list<string>}> */
+
+    /**
+     * @var array<string,array{class:string,template:string,pre_mount:list<string>,anonymous?:bool}>
+     */
     private array $components = [];
-    /** @var array<string,string> */
+
+    /**
+     * @var array<string,string>
+     */
     private array $namespacePaths = [];
 
     /**
-     * @param string[] $componentPaths Optional list of paths to scan for class-based components
+     * @param list<string> $componentPaths Optional list of paths to scan for class-based components
+     * @param array<string,string> $namespacePaths
      */
     public function __construct(Environment $twig, array $componentPaths = [], array $namespacePaths = [])
     {
@@ -37,8 +50,10 @@ final class SlimTwigComponentRuntime
      *
      * @param array<string,mixed> $props
      */
-    public function preRender(string $name, array $props): ?string
+    public function preRender(string $name, array $props): null
     {
+        unset($name, $props);
+
         return null;
     }
 
@@ -62,52 +77,16 @@ final class SlimTwigComponentRuntime
      */
     public function startEmbedComponent(string $name, array $props, array $context, string $hostTemplateName, int $index): PreRenderEvent
     {
-        $lower = $name;
-        if (!isset($this->components[$name])) {
-            foreach ($this->components as $k => $v) {
-                if (strcasecmp($k, $name) === 0) {
-                    $lower = $k;
-                    break;
-                }
-            }
-        }
-        if (!isset($this->components[$lower])) {
-            throw new \InvalidArgumentException(sprintf('Unknown component "%s".', $name));
-        } /* try case-insensitive match */
+        unset($hostTemplateName, $index);
 
-        $cfg = $this->components[$lower];
+        $cfg = $this->resolveComponentConfig($name);
+        [$component, $originalProps, $props] = $this->createMountedComponent($cfg, $props);
         $class = $cfg['class'];
         $template = $cfg['template'];
-        $preMountMethods = $cfg['pre_mount'] ?? [];
+        $preMountMethods = $cfg['pre_mount'];
 
-        if ($class === \Symfony\UX\TwigComponent\AnonymousComponent::class) { /* instantiate component (handle anonymous components) */
-            $component = new $class(); /* anonymous components receive their props via mount() */
-            $component->mount($props);
-            $originalProps = $props;
-            $props = []; /* after mounting, there are no "remaining" props to treat as attributes */
-        } else {
-            $component = new $class();
-
-            foreach ($preMountMethods as $method) { /* call PreMount methods (they may transform the props) */
-                $result = $component->$method($props);
-                if (null !== $result) {
-                    $props = $result;
-                }
-            }
-
-            $originalProps = $props;
-
-            foreach ($props as $k => $v) { /* mount public properties */
-                if (property_exists($component, $k)) {
-                    $component->$k = $v;
-                    unset($props[$k]);
-                }
-            }
-        }
-
-        $escaper = $this->twig->getRuntime(EscaperRuntime::class); /* attributes are the remaining props ("attributes" var is used in templates) */
+        $escaper = $this->twig->getRuntime(EscaperRuntime::class);
         $attributes = new ComponentAttributes($props, $escaper);
-
         $mounted = new MountedComponent($name, $component, $attributes, $originalProps, []);
 
         $meta = new ComponentMetadata([
@@ -119,12 +98,13 @@ final class SlimTwigComponentRuntime
             'attributes_var' => 'attributes',
         ]);
 
-        $classProps = get_object_vars($component); /* variables visible in the component template: context + input props + class public props + attributes */
-        $variables = array_merge($context, $originalProps, $classProps, [$meta->getAttributesVar() => $mounted->getAttributes()]);
+        $classProps = get_object_vars($component);
+        $variables = array_merge($context, $originalProps, $classProps, [
+            $meta->getAttributesVar() => $mounted->getAttributes(),
+        ]);
 
         $event = new PreRenderEvent($mounted, $meta, $variables);
-
-        $event->setVariables(array_merge($event->getVariables(), [ /* add convenience variables used by the official renderer */
+        $event->setVariables(array_merge($event->getVariables(), [
             'this' => $component,
             'computed' => new ComputedPropertiesProxy($component),
             'outerScope' => $context,
@@ -140,102 +120,235 @@ final class SlimTwigComponentRuntime
         /* no-op for our minimal implementation */
     }
 
-    public array $componentPaths = [];
-
     private function discoverComponents(): void
+    {
+        $this->discoverClassBasedComponents();
+        $this->discoverAnonymousComponents();
+    }
+
+    private function discoverClassBasedComponents(): void
     {
         foreach ($this->componentPaths as $path) {
             if (!is_dir($path)) {
                 continue;
             }
-            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
-            foreach ($files as $file) {
-                if (!$file->isFile() || $file->getExtension() !== 'php') {
-                    continue;
-                }
-                $content = file_get_contents($file->getPathname());
-                if (!preg_match('/namespace\\s+([^;]+);/m', $content, $ns)) {
-                    continue;
-                }
-                if (!preg_match('/class\\s+([A-Za-z0-9_]+)/m', $content, $cl)) {
-                    continue;
-                }
-                $fqcn = trim($ns[1]) . '\\' . trim($cl[1]);
-                if (!class_exists($fqcn)) {
-                    continue;
-                }
-                try {
-                    $ref = new \ReflectionClass($fqcn);
-                } catch (\ReflectionException $e) {
-                    continue;
-                }
-                $attrs = $ref->getAttributes(AsTwigComponent::class, \ReflectionAttribute::IS_INSTANCEOF);
-                $name = $ref->getShortName();
-                $template = null;
-                $preMount = [];
-                if ($attrs) {
-                    $inst = $attrs[0]->newInstance();
-                    $cfg = $inst->serviceConfig();
-                    $name = $cfg['key'] ?? $name;
-                    $template = $cfg['template'] ?? $template;
-                }
-                foreach ($ref->getMethods() as $m) {
-                    if ($m->getAttributes(PreMountAttr::class, \ReflectionAttribute::IS_INSTANCEOF)) {
-                        $preMount[] = $m->getName();
-                    }
-                }
-                if (null === $template) {
-                    $template = sprintf('@HtmlTwigComponent/%s.html.twig', strtolower($name));
-                }
-                if ($attrs) {
-                    $this->components[$name] = [
-                        'class' => $fqcn,
-                        'template' => $template,
-                        'pre_mount' => $preMount,
-                    ];
-                }
+
+            $this->discoverClassBasedComponentsInPath($path);
+        }
+    }
+
+    private function discoverClassBasedComponentsInPath(string $path): void
+    {
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
+
+        foreach ($files as $file) {
+            if (!$file->isFile() || $file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $this->discoverClassBasedComponentFromFile($file->getPathname());
+        }
+    }
+
+    private function discoverClassBasedComponentFromFile(string $filePath): void
+    {
+        $content = file_get_contents($filePath);
+        if ($content === false) {
+            return;
+        }
+
+        if (preg_match('/namespace\s+([^;]+);/m', $content, $namespaceMatch)
+            && preg_match('/class\s+(\w+)/m', $content, $classMatch)
+        ) {
+            $fqcn = trim($namespaceMatch[1]) . '\\' . trim($classMatch[1]);
+            if (class_exists($fqcn)) {
+                $this->registerClassBasedComponent($fqcn);
+            }
+        }
+    }
+
+    private function registerClassBasedComponent(string $fqcn): void
+    {
+        $ref = new \ReflectionClass($fqcn);
+        $attrs = $ref->getAttributes(AsTwigComponent::class, \ReflectionAttribute::IS_INSTANCEOF);
+        if (!$attrs) {
+            return;
+        }
+
+        $name = $ref->getShortName();
+        $template = null;
+
+        $inst = $attrs[0]->newInstance();
+        $cfg = $inst->serviceConfig();
+        $name = $cfg['key'] ?? $name;
+        $template = $cfg['template'] ?? $template;
+
+        $preMount = $this->collectPreMountMethods($ref);
+
+        if ($template === null) {
+            $template = sprintf('@HtmlTwigComponent/%s.html.twig', strtolower($name));
+        }
+
+        $this->components[$name] = [
+            'class' => $fqcn,
+            'template' => $template,
+            'pre_mount' => $preMount,
+        ];
+    }
+
+    /**
+     * @return array{class:string,template:string,pre_mount:list<string>,anonymous?:bool}
+     */
+    private function resolveComponentConfig(string $name): array
+    {
+        if (isset($this->components[$name])) {
+            return $this->components[$name];
+        }
+
+        foreach ($this->components as $componentName => $componentConfig) {
+            if (strcasecmp($componentName, $name) === 0) {
+                return $componentConfig;
             }
         }
 
-        $loader = $this->twig->getLoader(); /* 2. Discover anonymous Twig components in namespacePaths (Twig loader namespaces) */
-        if ($loader instanceof \Twig\Loader\FilesystemLoader) {
-            $namespaces = $loader->getNamespaces();
-            foreach ($namespaces as $ns) {
-                $paths = $loader->getPaths($ns);
-                foreach ($paths as $path) {
-                    $componentsDir = rtrim($path, '/\\') . DIRECTORY_SEPARATOR . 'components';
-                    if (!is_dir($componentsDir)) {
-                        continue;
-                    }
-                    $it = new \DirectoryIterator($componentsDir);
-                    foreach ($it as $file) {
-                        if (!$file->isFile()) {
-                            continue;
-                        }
-                        $filename = $file->getBasename();
-                        if (str_ends_with($filename, '.html.twig')) {
-                            $basename = substr($filename, 0, -strlen('.html.twig'));
-                        } else {
-                            $basename = pathinfo($filename, PATHINFO_FILENAME);
-                        }
-                        $name = $basename;
-                        if ($ns === \Twig\Loader\FilesystemLoader::MAIN_NAMESPACE) { /* build the twig template reference, using namespaces if not main */
-                            $template = 'components/' . $file->getBasename();
-                        } else {
-                            $template = '@' . $ns . '/components/' . $file->getBasename();
-                        }
-                        if (isset($this->components[$name]) && empty($this->components[$name]['anonymous'])) { /* prefer class-based components when both exist; otherwise register anonymous */
-                            continue;
-                        }
-                        $this->components[$name] = [
-                            'class' => \Symfony\UX\TwigComponent\AnonymousComponent::class,
-                            'template' => $template,
-                            'pre_mount' => [],
-                            'anonymous' => true,
-                        ];
-                    }
-                }
+        throw new \InvalidArgumentException(sprintf('Unknown component "%s".', $name));
+    }
+
+    /**
+     * @param array{class:string,template:string,pre_mount:list<string>,anonymous?:bool} $cfg
+     * @param array<string,mixed> $props
+     * @return array{0:object,1:array<string,mixed>,2:array<string,mixed>}
+     */
+    private function createMountedComponent(array $cfg, array $props): array
+    {
+        $class = $cfg['class'];
+
+        if ($class === \Symfony\UX\TwigComponent\AnonymousComponent::class) {
+            return $this->createAnonymousComponent($class, $props);
+        }
+
+        return $this->createClassBasedComponent($class, $cfg['pre_mount'], $props);
+    }
+
+    /**
+     * @param class-string $class
+     * @param array<string,mixed> $props
+     * @return array{0:object,1:array<string,mixed>,2:array<string,mixed>}
+     */
+    private function createAnonymousComponent(string $class, array $props): array
+    {
+        $component = new $class();
+        $component->mount($props);
+
+        return [$component, $props, []];
+    }
+
+    /**
+     * @param class-string $class
+     * @param list<string> $preMountMethods
+     * @param array<string,mixed> $props
+     * @return array{0:object,1:array<string,mixed>,2:array<string,mixed>}
+     */
+    private function createClassBasedComponent(string $class, array $preMountMethods, array $props): array
+    {
+        $component = new $class();
+
+        foreach ($preMountMethods as $method) {
+            $result = $component->{$method}($props);
+            if ($result !== null) {
+                $props = $result;
             }
         }
+
+        $originalProps = $props;
+
+        foreach ($props as $key => $value) {
+            if (property_exists($component, $key)) {
+                $component->{$key} = $value;
+                unset($props[$key]);
+            }
+        }
+
+        return [$component, $originalProps, $props];
+    }
+
+    /**
+     * @param \ReflectionClass<object> $ref
+     * @return list<string>
+     */
+    private function collectPreMountMethods(\ReflectionClass $ref): array
+    {
+        $preMount = [];
+
+        foreach ($ref->getMethods() as $method) {
+            if ($method->getAttributes(PreMountAttr::class, \ReflectionAttribute::IS_INSTANCEOF)) {
+                $preMount[] = $method->getName();
+            }
+        }
+
+        return $preMount;
+    }
+
+    private function discoverAnonymousComponents(): void
+    {
+        $loader = $this->twig->getLoader();
+        if (!$loader instanceof FilesystemLoader) {
+            return;
+        }
+
+        foreach ($loader->getNamespaces() as $namespace) {
+            $this->discoverAnonymousComponentsInNamespace($loader, $namespace);
+        }
+    }
+
+    private function discoverAnonymousComponentsInNamespace(FilesystemLoader $loader, string $namespace): void
+    {
+        foreach ($loader->getPaths($namespace) as $path) {
+            $componentsDir = rtrim($path, '/\\') . DIRECTORY_SEPARATOR . 'components';
+            if (!is_dir($componentsDir)) {
+                continue;
+            }
+
+            $this->discoverAnonymousComponentsInDirectory($componentsDir, $namespace);
+        }
+    }
+
+    private function discoverAnonymousComponentsInDirectory(string $componentsDir, string $namespace): void
+    {
+        $it = new \DirectoryIterator($componentsDir);
+
+        foreach ($it as $file) {
+            if (!$file->isFile()) {
+                continue;
+            }
+
+            $this->registerAnonymousComponent($namespace, $file->getBasename());
+        }
+    }
+
+    private function registerAnonymousComponent(string $namespace, string $basename): void
+    {
+        if (str_ends_with($basename, '.html.twig')) {
+            $name = substr($basename, 0, -strlen('.html.twig'));
+        } else {
+            $name = pathinfo($basename, PATHINFO_FILENAME);
+        }
+
+        if ($namespace === FilesystemLoader::MAIN_NAMESPACE) {
+            $template = 'components/' . $basename;
+        } else {
+            $template = '@' . $namespace . '/components/' . $basename;
+        }
+
+        if (isset($this->components[$name]) && !($this->components[$name]['anonymous'] ?? false)) {
+            return;
+        }
+
+        $this->components[$name] = [
+            'class' => \Symfony\UX\TwigComponent\AnonymousComponent::class,
+            'template' => $template,
+            'pre_mount' => [],
+            'anonymous' => true,
+        ];
     }
 }
