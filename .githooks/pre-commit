@@ -1,32 +1,24 @@
 #!/bin/bash
+START_TIME=$(date +%s)
+
+# Set to true to prepend `time` to each command for performance profiling
+TIME_COMMANDS=false
+RUN() { if $TIME_COMMANDS; then time "$@"; else "$@"; fi; }
 
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
-ORANGE='\033[1;31m'
 NC='\033[0m' # No Color
 
-# Settings
-protectedBranches=("master" "main" "develop")
-allowFailuresInProtectedBranches=false
-allowFailuresInOtherBranches=true
-
-# Get the current branch name
-currentBranch=$(git rev-parse --abbrev-ref HEAD)
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Failed to get the current branch name.${NC}"
-    exit 1
-fi
-
-echo -e "Committing as ${YELLOW}$(git config user.name) ${NC}/ ${YELLOW}$(git config user.email)${NC}"
-echo -e "Running tests on branch: ${YELLOW}$currentBranch${NC}"
-
+# assume all checks will pass... until they don't
 PASS=true
 
-CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM -- '*.php')
+printf "Committing as ${YELLOW}$(git config user.name) ${NC}/ ${YELLOW}$(git config user.email)${NC}\n"
 
-# easy-ci
+CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM -- '*.php' || true)
+
+# Swiss Knife
 PHP_SWISSKNIFE="./vendor/bin/swiss-knife"
 HAS_PHP_SWISSKNIFE=false
 if [ -x $PHP_SWISSKNIFE ]; then
@@ -35,29 +27,26 @@ fi
 
 printf "${YELLOW}Rector Swiss Knife${NC}\n"
 if $HAS_PHP_SWISSKNIFE; then
-    # prevent comitting unresolved conflicts or erroneous merges
-    php -d error_reporting=E_ALL~E_DEPRECATED $PHP_SWISSKNIFE check-conflicts ./bin ./src ./tests --ansi
+    # prevent committing unresolved conflicts or erroneous merges
+    RUN composer run swiss-knife-check-conflicts
     ret_code=$?
 
     if [[ $ret_code == 1 ]]; then
         PASS=false
     fi
 
-    php -d error_reporting=E_ALL~E_DEPRECATED $PHP_SWISSKNIFE check-commented-code ./bin ./src ./tests --line-limit 4 --no-ansi -n
+    RUN composer run swiss-knife-check-commented-code
     ret_code=$?
+
     if [[ $ret_code == 1 ]]; then
         PASS=false
     fi
-
-    #$PHP_SWISSKNIFE finalize-classes ./bin ./src ./tests --ansi
-
-    #$PHP_SWISSKNIFE privatize-constants ./bin ./src ./tests --ansi
 
   else
-    printf "\nrector/swiss-knife is required. Install it:\n\n  composer require --dev rector/swiss-knife\n\n"
+    printf "\nrector/swiss-knife is required. Install it:\n\n composer require --dev rector/swiss-knife\n\n"
 fi
 
-# if swiss knife doesn't pass, do not continue. early return
+# if swiss knife doesn't pass, do not continue
 if ! $PASS; then
   printf "pre commit hook ${RED}FAILED${NC}\n"
   exit 1
@@ -76,14 +65,20 @@ if $HAS_PHP_ECS; then
 # if ([ -x $PHP_ECS ] && [ -n "$CHANGED_FILES" ]); then
     printf "ECS start"
     # Get a list of files in the staging area
-    FILES=` git status --porcelain | grep -e '^[AM]\(.*\).php$' | cut -c 3- | tr '\n' ' '`
+    FILES=` git status --porcelain | grep -e '^[AM]\(.*\).php$' | cut -c 3- | grep -v '^demos/vendor/' | tr '\n' ' '`
     if [ -z "$FILES" ]; then
-          printf "No PHP file in this commit. Skipping ECS.\n"
+          printf "\nNo PHP file in this commit. Skipping ECS.\n"
     else
-        php -d error_reporting=E_ALL~E_DEPRECATED $PHP_ECS check ${FILES} --fix
+        # Strip site/ prefix for ECS command
+        FILES_FOR_ECS=$(echo "$FILES" | sed 's|site/||g')
+        RUN composer run fix-cs ${FILES_FOR_ECS}
         ret_code=$?
         if [[ $ret_code == 0 ]]; then
-            echo $FILES > .commit
+            # Trim whitespace and check if FILES is not empty
+            FILES_TRIMMED=$(echo "$FILES" | xargs)
+            if [ -n "$FILES_TRIMMED" ]; then
+                git add $FILES
+            fi
         else
             # Different code than 0 means that there were unresolved fixes
             PASS=false
@@ -103,21 +98,75 @@ fi
 printf "${YELLOW}PHPStan${NC}\n"
 # @todo consider having phpstan scan all the complete repo, instead of comitted php files
 if $HAS_PHPSTAN; then
-  if php -d error_reporting=E_ALL~E_DEPRECATED $PHPSTAN analyse -c ./phpstan.neon --memory-limit=1G $CHANGED_FILES; then
-    # All good
-    printf "${GREEN}PHPStan passed${NC}\n"
+  if [ -z "$CHANGED_FILES" ]; then
+        printf "\nNo PHP file in this commit. Skipping PHPStan.\n"
   else
-    PASS=false
+    # Filter out files excluded by phpstan.neon (vendor/, tests/, flex/)
+    PHPSTAN_FILES=$(echo "$CHANGED_FILES" | tr ' ' '\n' | grep -v '^vendor/' | grep -v '^tests/' | grep -v '^flex/' | grep -v '^demos/vendor/' | tr '\n' ' ' | xargs)
+    if [ -z "$PHPSTAN_FILES" ]; then
+        printf "\nNo analysable PHP files in this commit. Skipping PHPStan.\n"
+    elif RUN $PHPSTAN analyse -c ./phpstan.neon --ansi --memory-limit=1G $PHPSTAN_FILES; then
+      # All good
+      printf "${GREEN}PHPStan passed${NC}\n"
+    else
+      PASS=false
+    fi
   fi
 else
-  printf "\nphpstan is required. Install it with:\n\n  ddev composer req --dev phpstan/phpstan\n\n"
+  printf "\nphpstan is required. Install it with:\n\n composer req --dev phpstan/phpstan\n\n"
 fi
 
-# pest
-HAS_PEST=false
-PEST="./vendor/bin/pest"
-if [ -x $PEST ]; then
-    HAS_PEST=true
+HAS_PHPMD=false
+PHPMD="./vendor/bin/phpmd"
+if [ -x $PHPMD ]; then
+    HAS_PHPMD=true
+fi
+
+run_phpmd() {
+  RUN php -d error_reporting='E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED' "$PHPMD" "$1" text phpmd.xml
+}
+
+if $HAS_PHPMD; then
+  STAGED_PHP_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.php$' | grep -v '^demos/vendor/' | tr '\n' ',')
+
+  if [ -z "$STAGED_PHP_FILES" ]; then
+    printf "${YELLOW}PHP Mess Detector${NC} — no PHP files staged, skipping.\n"
+  else
+    STAGED_PHP_FILES="${STAGED_PHP_FILES%,}"
+    printf "${YELLOW}PHP Mess Detector${NC}\n"
+
+    run_phpmd "$STAGED_PHP_FILES"
+    if [ $? -eq 0 ]; then
+      printf "${GREEN}PASSED${NC}\n"
+    else
+      printf "${RED}FAILED${NC}\n"
+      PASS=false
+    fi
+  fi
+else
+  printf "\nphpmd is required. Install it with:\n\n  composer require --dev phpmd/phpmd\n\n"
+fi
+
+
+# you shouldn't be able to commit if composer.lock and composer.json are out of sync
+printf "${YELLOW}Composer Lockfile${NC}\n"
+RUN composer validate --no-check-all --no-check-publish
+ret_code=$?
+if [[ $ret_code == 0 ]]; then
+    printf "${GREEN}Composer validation passed${NC}\n"
+else
+    printf "${RED}Composer validation failed${NC}\n"
+    PASS=false
+fi
+
+# you should still be able to commit if there are CVE vulnerabilities - information only
+printf "${YELLOW}Composer Audit${NC}\n"
+RUN composer audit --abandoned=report
+ret_code=$?
+if [[ $ret_code == 0 ]]; then
+    printf "${GREEN}Composer audit passed${NC}\n"
+else
+    printf "${RED}Composer audit failed${NC}\n"
 fi
 
 # add pest unit tests. stopping the commit if they fail
@@ -135,11 +184,9 @@ if $HAS_PEST; then
     if RUN $PEST tests/Unit --exclude-group=benchmark --exclude-group=external-bin --testdox --colors=always; then
       printf "${GREEN}Unit tests passed${NC}\n"
 
-      if RUN composer run test:coverage:unit \
-        && RUN composer run test:coverage:integration \
-        && RUN php bin/merge-clover.php clover.xml clover.unit.xml clover.integration.xml; then
-        git add clover.unit.xml clover.integration.xml clover.xml
-        printf "${GREEN}Clover reports updated (unit, integration, merged) at $(date '+%Y-%m-%d %H:%M:%S')${NC}\n"
+      if RUN composer run test:coverage:unit; then
+        git add clover.xml
+        printf "${GREEN}Clover reports updated at $(date '+%Y-%m-%d %H:%M:%S')${NC}\n"
       else
         printf "${RED}Coverage generation/merge failed${NC}\n"
         PASS=false
@@ -153,21 +200,16 @@ else
 fi
 
 
-# PHPMD - PHP Mess Detector
-source ./.githooks/pre-commit.d/phpmd.sh
-
-# Run composer audit locally
-printf "${YELLOW}Composer Audit${NC}\n"
-composer audit
-ret_code=$?
-if [[ $ret_code == 1 ]]; then
-    PASS=false
-fi
+END_TIME=$(date +%s) # Record the end time
+DURATION=$((END_TIME - START_TIME)) # Calculate the duration
 
 if ! $PASS; then
-  printf "pre commit hook ${RED}FAILED${NC}\n"
+  printf "pre commit hook ${RED}FAILED${NC}. Took ${YELLOW}${DURATION}${NC} seconds\n"
   exit 1
 else
-  printf "pre commit hook ${GREEN}SUCCEEDED${NC}\n"
+  printf "pre commit hook ${GREEN}SUCCEEDED${NC}. Took ${YELLOW}${DURATION}${NC} seconds\n"
+  if [ -n "$CHANGED_FILES" ]; then
+    git add $CHANGED_FILES
+  fi
   exit 0
 fi

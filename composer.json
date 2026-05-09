@@ -99,7 +99,17 @@
         "git-hooks-init": "vendor/bin/cghooks add --ignore-lock",
         "git-hooks-update": "vendor/bin/cghooks update",
         "phpstan": "phpstan --memory-limit=1G",
-        "phpunit": "phpunit --bootstrap vendor/autoload.php"
+        "phpmd": "@php -d memory_limit=1G -d error_reporting='E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED' vendor/bin/phpmd ./src text phpmd.xml",
+        "phpunit": "phpunit --bootstrap vendor/autoload.php",
+        "swiss-knife-check-conflicts": "vendor/bin/swiss-knife check-conflicts ./src --ansi",
+        "swiss-knife-check-commented-code": "vendor/bin/swiss-knife check-commented-code ./src --line-limit 4 --no-ansi",
+        "swiss-knife-find-multi-classes": "vendor/bin/swiss-knife find-multi-classes ./src --ansi",
+        "swiss-knife-finalize-classes": "vendor/bin/swiss-knife finalize-classes ./src --ansi",
+        "swiss-knife-privatize-constants": "vendor/bin/swiss-knife privatize-constants ./src --ansi",
+        "test:coverage": "composer run test:coverage:unit && composer run test:coverage:integration",
+        "test:coverage:unit": "XDEBUG_MODE=coverage vendor/bin/pest tests/Unit --exclude-group=external-bin --coverage-clover=clover.xml",
+        "test:coverage:html:unit": "XDEBUG_MODE=coverage vendor/bin/pest tests/Unit --exclude-group=external-bin --coverage-html=coverage-report-unit",
+        "test:coverage:html:integration": "XDEBUG_MODE=coverage vendor/bin/pest tests/Unit --coverage-html=coverage-report"
     },
     "funding": [
         {
