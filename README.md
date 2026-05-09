@@ -16,7 +16,11 @@
 
 <p dir="auto" align="center"><a href="https://packagist.org/packages/vardumper/slim-ux-twig-component" rel="nofollow"><img src="https://camo.githubusercontent.com/1cb1d589a8e7dbd3b472c9aba54cb8249143d9ddb181d27b6b4d76b47e3dd752/68747470733a2f2f706f7365722e707567782e6f72672f76617264756d7065722f736c696d2d75782d747769672d636f6d706f6e656e742f762f737461626c65" alt="Latest Stable Version" data-canonical-src="https://poser.pugx.org/vardumper/slim-ux-twig-component/v/stable" style="max-width: 100%;"></a>
 <a href="https://packagist.org/packages/vardumper/slim-ux-twig-component" rel="nofollow"><img src="https://camo.githubusercontent.com/e1d931cd82d815f27573be5ab2809bbd081f04c80d63cc99c7b6c0ea1f4981d2/68747470733a2f2f706f7365722e707567782e6f72672f76617264756d7065722f736c696d2d75782d747769672d636f6d706f6e656e742f646f776e6c6f616473" alt="Total Downloads" data-canonical-src="https://poser.pugx.org/vardumper/slim-ux-twig-component/downloads" style="max-width: 100%;"></a>
-<a href="https://dtrack.erikpoehler.us/projects/4d0cd6c8-6c59-4d4a-8096-b503045a06b9" rel="nofollow"><img src="https://dtrack.erikpoehler.us/api/v1/badge/vulns/project/4d0cd6c8-6c59-4d4a-8096-b503045a06b9?apiKey=odt_nG83W_EAcQZkk6b5KqknIVoK8nfNjSz38Ompnn" style="max-width: 100%;"></a></p>
+<a href="https://dtrack.erikpoehler.us/projects/4d0cd6c8-6c59-4d4a-8096-b503045a06b9" rel="nofollow"><img src="https://dtrack.erikpoehler.us/api/v1/badge/vulns/project/4d0cd6c8-6c59-4d4a-8096-b503045a06b9?apiKey=odt_nG83W_EAcQZkk6b5KqknIVoK8nfNjSz38Ompnn" style="max-width: 100%;"></a>
+<img src="https://img.shields.io/badge/license-mit-red" alt="License" />
+<img src="https://img.shields.io/badge/unit%20tests-passing-green?style=flat&amp;color=%234c1" style="max-width: 100%;">
+<img src="https://raw.githubusercontent.com/vardumper/dom-orm/refs/heads/main/coverage.svg">
+</p>
 
 A small integration to make building and using **[Twig Components](https://symfony.com/bundles/ux-twig-component/current/index.html)** easy in Slim Framework. It provides a custom Runtime and allows configuration of component paths as well as passing in more Twig namespaces/paths. As a caveat, installing this package, does pull in a number of Symfony packages.
 Makes use of [`vardumper/extended-htmldocument`](https://github.com/vardumper/extended-htmldocument) which adds improved HTML5 support to PHP - used for HTML5 attribute validation via Immutable Attribute Enums when using the pre-built Twig Components that are included in this package (for example `<twig:A href="#" role="button">Inline Button</twig:A>`). 
