@@ -19,7 +19,7 @@
 <a href="https://dtrack.erikpoehler.us/projects/4d0cd6c8-6c59-4d4a-8096-b503045a06b9" rel="nofollow"><img src="https://dtrack.erikpoehler.us/api/v1/badge/vulns/project/4d0cd6c8-6c59-4d4a-8096-b503045a06b9?apiKey=odt_nG83W_EAcQZkk6b5KqknIVoK8nfNjSz38Ompnn" style="max-width: 100%;"></a>
 <img src="https://img.shields.io/badge/license-mit-red" alt="License" />
 <img src="https://img.shields.io/badge/unit%20tests-passing-green?style=flat&amp;color=%234c1" style="max-width: 100%;">
-<img src="https://raw.githubusercontent.com/vardumper/dom-orm/refs/heads/main/coverage.svg">
+<img src="https://raw.githubusercontent.com/vardumper/slim-ux-twig-component/refs/heads/main/coverage.svg">
 </p>
 
 A small integration to make building and using **[Twig Components](https://symfony.com/bundles/ux-twig-component/current/index.html)** easy in Slim Framework. It provides a custom Runtime and allows configuration of component paths as well as passing in more Twig namespaces/paths. As a caveat, installing this package, does pull in a number of Symfony packages.
