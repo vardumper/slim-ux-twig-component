@@ -66,7 +66,7 @@
         "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^2.1.54",
         "rector/swiss-knife": "^2.3.5",
-        "symplify/easy-coding-standard": "^12.6.2"
+        "symplify/easy-coding-standard": "^12.6.2 || ^13.0.0"
     },
     "extra": {
         "hooks": {
