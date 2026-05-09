@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace Vardumper\SlimTwigComponent;
 
 use Slim\Views\Twig;
-use Symfony\UX\TwigComponent\Twig\ComponentExtension;
-use Symfony\UX\TwigComponent\Twig\ComponentLexer;
-use Symfony\UX\TwigComponent\Twig\ComponentRuntime;
+use Symfony\UX\TwigComponent\Twig\{ComponentExtension, ComponentLexer, ComponentRuntime};
 use Twig\RuntimeLoader\FactoryRuntimeLoader;
 use Vardumper\SlimTwigComponent\Twig\SlimTwigComponentRuntime;
 
@@ -22,40 +20,34 @@ final class SlimTwigComponent
 
     /**
      * Register Twig Components with the given Twig environment.
-     *
-     * provide optional $namespacePaths to lookup twig files or anonymous components.
-     * provide optional $componentPaths to lookup class-based components.
-     *
-     * @param array<string,string> $namespacePaths
-     * @param list<string> $componentPaths
+     */
+    /**
+     * @phpstan-param array<string, string> $namespacePaths
+     * @phpstan-param list<string> $componentPaths
      */
     public static function register(Twig $twig, array $namespacePaths = [], array $componentPaths = []): void
     {
         $env = $twig->getEnvironment();
-        $allNamespacePaths = array_merge(self::DEFAULT_NAMESPACES, $namespacePaths);
+        $allNamespacePaths = \array_merge(self::DEFAULT_NAMESPACES, $namespacePaths);
 
-        // Register default template namespaces and append any additional namespaces passed in
         $loader = $env->getLoader();
         if ($loader instanceof \Twig\Loader\FilesystemLoader) {
             foreach ($allNamespacePaths as $ns => $path) {
-                if (is_dir($path)) {
+                if (\is_dir($path)) {
                     $loader->addPath($path, $ns);
                 }
             }
         }
 
-        // Register UX extension
         $env->addExtension(new ComponentExtension());
 
-        // Enable <twig:Component />
         $env->setLexer(new ComponentLexer($env));
 
-        // Runtime loader
-        $componentPaths = array_merge(self::DEFAULT_COMPONENT_PATHS, $componentPaths);
+        $componentPaths = \array_merge(self::DEFAULT_COMPONENT_PATHS, $componentPaths);
         $env->addRuntimeLoader(
             new FactoryRuntimeLoader([
-                ComponentRuntime::class => fn () =>
-                    new SlimTwigComponentRuntime($env, $componentPaths, $allNamespacePaths),
+                ComponentRuntime::class => static fn () =>
+                    new SlimTwigComponentRuntime($env, $componentPaths),
             ])
         );
     }

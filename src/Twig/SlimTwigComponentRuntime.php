@@ -3,25 +3,16 @@ declare(strict_types=1);
 
 namespace Vardumper\SlimTwigComponent\Twig;
 
-use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
+use Symfony\UX\TwigComponent\{Attribute\AsTwigComponent, ComponentAttributes, ComponentMetadata, ComputedPropertiesProxy, Event\PreRenderEvent, MountedComponent};
 use Symfony\UX\TwigComponent\Attribute\PreMount as PreMountAttr;
-use Symfony\UX\TwigComponent\ComponentAttributes;
-use Symfony\UX\TwigComponent\ComponentMetadata;
-use Symfony\UX\TwigComponent\ComputedPropertiesProxy;
-use Symfony\UX\TwigComponent\Event\PreRenderEvent;
-use Symfony\UX\TwigComponent\MountedComponent;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
-use Twig\Runtime\EscaperRuntime;
+use Twig\{Environment, Loader\FilesystemLoader, Runtime\EscaperRuntime};
 
 final class SlimTwigComponentRuntime
 {
     /**
      * @var list<string>
      */
-    public array $componentPaths = [];
-
-    private Environment $twig;
+    private readonly array $componentPaths;
 
     /**
      * @var array<string,array{class:string,template:string,pre_mount:list<string>,anonymous?:bool}>
@@ -29,26 +20,18 @@ final class SlimTwigComponentRuntime
     private array $components = [];
 
     /**
-     * @var array<string,string>
+     * @phpstan-param list<string> $componentPaths
      */
-    private array $namespacePaths = [];
-
-    /**
-     * @param list<string> $componentPaths Optional list of paths to scan for class-based components
-     * @param array<string,string> $namespacePaths
-     */
-    public function __construct(Environment $twig, array $componentPaths = [], array $namespacePaths = [])
-    {
-        $this->twig = $twig;
+    public function __construct(
+        private readonly Environment $twig,
+        array $componentPaths = [],
+    ) {
         $this->componentPaths = $componentPaths;
-        $this->namespacePaths = $namespacePaths;
         $this->discoverComponents();
     }
 
     /**
-     * Called by compiled templates to short-circuit render if needed. We don't dispatch events here, so always return null.
-     *
-     * @param array<string,mixed> $props
+     * @phpstan-param array<string, mixed> $props
      */
     public function preRender(string $name, array $props): null
     {
@@ -58,9 +41,7 @@ final class SlimTwigComponentRuntime
     }
 
     /**
-     * Render a component by name (used by the `component()` Twig function).
-     *
-     * @param array<string,mixed> $props
+     * @phpstan-param array<string, mixed> $props
      */
     public function render(string $name, array $props = []): string
     {
@@ -70,10 +51,8 @@ final class SlimTwigComponentRuntime
     }
 
     /**
-     * Create pre-render information for an embedded component (used by {% component %} tag).
-     *
-     * @param array<string,mixed> $props
-     * @param array<string,mixed> $context
+     * @phpstan-param array<string, mixed> $props
+     * @phpstan-param array<string, mixed> $context
      */
     public function startEmbedComponent(string $name, array $props, array $context, string $hostTemplateName, int $index): PreRenderEvent
     {
@@ -98,18 +77,18 @@ final class SlimTwigComponentRuntime
             'attributes_var' => 'attributes',
         ]);
 
-        $classProps = get_object_vars($component);
-        $variables = array_merge($context, $originalProps, $classProps, [
+        $classProps = \get_object_vars($component);
+        $variables = \array_merge($context, $originalProps, $classProps, [
             $meta->getAttributesVar() => $mounted->getAttributes(),
         ]);
 
         $event = new PreRenderEvent($mounted, $meta, $variables);
-        $event->setVariables(array_merge($event->getVariables(), [
+        $event->setVariables(\array_merge($event->getVariables(), [
             'this' => $component,
             'computed' => new ComputedPropertiesProxy($component),
             'outerScope' => $context,
             '__props' => $classProps,
-            '__context' => array_diff_key($context, $originalProps),
+            '__context' => \array_diff_key($context, $originalProps),
         ]));
 
         return $event;
@@ -152,16 +131,16 @@ final class SlimTwigComponentRuntime
 
     private function discoverClassBasedComponentFromFile(string $filePath): void
     {
-        $content = file_get_contents($filePath);
+        $content = \file_get_contents($filePath);
         if ($content === false) {
             return;
         }
 
-        if (preg_match('/namespace\s+([^;]+);/m', $content, $namespaceMatch)
-            && preg_match('/class\s+(\w+)/m', $content, $classMatch)
+        if (\preg_match('/namespace\s+([^;]+);/m', $content, $namespaceMatch)
+            && \preg_match('/class\s+(\w+)/m', $content, $classMatch)
         ) {
-            $fqcn = trim($namespaceMatch[1]) . '\\' . trim($classMatch[1]);
-            if (class_exists($fqcn)) {
+            $fqcn = \trim($namespaceMatch[1]) . '\\' . \trim($classMatch[1]);
+            if (\class_exists($fqcn)) {
                 $this->registerClassBasedComponent($fqcn);
             }
         }
@@ -186,7 +165,7 @@ final class SlimTwigComponentRuntime
         $preMount = $this->collectPreMountMethods($ref);
 
         if ($template === null) {
-            $template = sprintf('@HtmlTwigComponent/%s.html.twig', strtolower($name));
+            $template = \sprintf('@HtmlTwigComponent/%s.html.twig', \strtolower($name));
         }
 
         $this->components[$name] = [
@@ -215,9 +194,9 @@ final class SlimTwigComponentRuntime
     }
 
     /**
-     * @param array{class:string,template:string,pre_mount:list<string>,anonymous?:bool} $cfg
-     * @param array<string,mixed> $props
-     * @return array{0:object,1:array<string,mixed>,2:array<string,mixed>}
+     * @phpstan-param array{class:string,template:string,pre_mount:list<string>,anonymous?:bool} $cfg
+     * @phpstan-param array<string, mixed> $props
+     * @phpstan-return array{0:object,1:array<string, mixed>,2:array<string, mixed>}
      */
     private function createMountedComponent(array $cfg, array $props): array
     {
@@ -231,9 +210,9 @@ final class SlimTwigComponentRuntime
     }
 
     /**
-     * @param class-string $class
-     * @param array<string,mixed> $props
-     * @return array{0:object,1:array<string,mixed>,2:array<string,mixed>}
+     * @phpstan-param class-string $class
+     * @phpstan-param array<string, mixed> $props
+     * @phpstan-return array{0:object,1:array<string, mixed>,2:array<string, mixed>}
      */
     private function createAnonymousComponent(string $class, array $props): array
     {
@@ -244,10 +223,10 @@ final class SlimTwigComponentRuntime
     }
 
     /**
-     * @param class-string $class
-     * @param list<string> $preMountMethods
-     * @param array<string,mixed> $props
-     * @return array{0:object,1:array<string,mixed>,2:array<string,mixed>}
+     * @phpstan-param class-string $class
+     * @phpstan-param list<string> $preMountMethods
+     * @phpstan-param array<string, mixed> $props
+     * @phpstan-return array{0:object,1:array<string, mixed>,2:array<string, mixed>}
      */
     private function createClassBasedComponent(string $class, array $preMountMethods, array $props): array
     {
@@ -304,8 +283,8 @@ final class SlimTwigComponentRuntime
     private function discoverAnonymousComponentsInNamespace(FilesystemLoader $loader, string $namespace): void
     {
         foreach ($loader->getPaths($namespace) as $path) {
-            $componentsDir = rtrim($path, '/\\') . DIRECTORY_SEPARATOR . 'components';
-            if (!is_dir($componentsDir)) {
+            $componentsDir = \rtrim($path, '/\\') . DIRECTORY_SEPARATOR . 'components';
+            if (!\is_dir($componentsDir)) {
                 continue;
             }
 
@@ -328,10 +307,10 @@ final class SlimTwigComponentRuntime
 
     private function registerAnonymousComponent(string $namespace, string $basename): void
     {
-        if (str_ends_with($basename, '.html.twig')) {
-            $name = substr($basename, 0, -strlen('.html.twig'));
+        if (\str_ends_with($basename, '.html.twig')) {
+            $name = \substr($basename, 0, -\strlen('.html.twig'));
         } else {
-            $name = pathinfo($basename, PATHINFO_FILENAME);
+            $name = \pathinfo($basename, PATHINFO_FILENAME);
         }
 
         if ($namespace === FilesystemLoader::MAIN_NAMESPACE) {
