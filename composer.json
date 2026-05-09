@@ -45,7 +45,7 @@
     },
     "require": {
         "php": ">=8.3",
-        "slim/slim": "^2.0|^3.0|^4.0",
+        "slim/slim": "^4.0",
         "slim/twig-view": "^3.4.1",
         "symfony/ux-twig-component": "^2.0|^3.0",
         "symfony/options-resolver": "^5.4|^6.0|^7.0|^8.0",

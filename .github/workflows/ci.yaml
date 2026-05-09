@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         php: ["8.3", "8.4", "8.5"]
-        slim-require: ["2.*", "3.*", "4.*"]
+        slim-require: ["4.*"]
 
     steps:
       - name: Checkout
