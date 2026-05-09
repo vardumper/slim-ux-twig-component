@@ -1,13 +1,53 @@
 {
     "name": "vardumper/slim-ux-twig-component",
+    "homepage": "https://github.com/vardumper/slim-ux-twig-component",
     "description": "Symfony UX Twig Component integration for Slim Framework",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "html",
+        "html5",
+        "twig",
+        "slim",
+        "htmldocument",
+        "extended",
+        "php",
+        "php8",
+        "php84",
+        "ux",
+        "twig-components",
+        "twig-component"
+    ],
+    "support": {
+        "issues": "https://github.com/vardumper/slim-ux-twig-component/issues",
+        "docs": "https://vardumper.github.io/slim-ux-twig-component/",
+        "source": "https://github.com/vardumper/slim-ux-twig-component",
+        "security": "https://github.com/vardumper/slim-ux-twig-component/security/dependabot"
+    },
+    "authors": [
+        {
+            "name": "Erik Pöhler",
+            "email": "info@erikpoehler.com"
+        }
+    ],
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.4"
+        },
+        "optimize-autoloader": true,
+        "preferred-install": {
+            "*": "dist"
+        },
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
     "require": {
         "php": ">=8.4",
         "slim/slim": "^4.15.1",
         "slim/twig-view": "^3.4.1",
-        "symfony/ux-twig-component": "^2.32",
+        "symfony/ux-twig-component": "^2.0|^3.0",
         "symfony/options-resolver": "^5.4|^6.0|^7.0|^8.0",
         "vardumper/html5-twig-component-bundle": "^0.2.74"
     },
@@ -15,5 +55,64 @@
         "psr-4": {
             "Vardumper\\SlimTwigComponent\\": "src/"
         }
-    }
+    },
+    "require-dev": {
+        "brainmaestro/composer-git-hooks": "dev-master",
+        "edent/pretty-print-html": "2025-04-18",
+        "friendsofphp/php-cs-fixer": "^3.95.1",
+        "pestphp/pest": "^3.8.6",
+        "pestphp/pest-plugin-drift": "^3.0",
+        "pestphp/pest-plugin-type-coverage": "^3.6.1",
+        "phpmd/phpmd": "^2.15",
+        "phpstan/phpstan": "^2.1.54",
+        "rector/swiss-knife": "^2.3.5",
+        "symplify/easy-coding-standard": "^12.6.2"
+    },
+    "extra": {
+        "hooks": {
+            "pre-commit": [
+                ".githooks/pre-commit"
+            ],
+            "commit-msg": [
+                ".githooks/commit-msg"
+            ],
+            "post-commit": [
+                ".githooks/post-commit"
+            ]
+        }
+    },
+    "scripts": {
+        "post-create-project-cmd": [
+            "@composer git-hooks-init",
+            "@composer dump-autoload -o"
+        ],
+        "post-install-cmd": [
+            "@composer dump-autoload -o -a",
+            "@composer git-hooks-init"
+        ],
+        "post-update-cmd": [
+            "@composer dump-autoload -o",
+            "@composer git-hooks-update"
+        ],
+        "check-cs": "ecs check --ansi",
+        "fix-cs": "ecs check --ansi --fix",
+        "git-hooks-init": "vendor/bin/cghooks add --ignore-lock",
+        "git-hooks-update": "vendor/bin/cghooks update",
+        "phpstan": "phpstan --memory-limit=1G",
+        "phpunit": "phpunit --bootstrap vendor/autoload.php"
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/vardumper"
+        },
+        {
+            "type": "buymeacoffee",
+            "url": "https://www.buymeacoffee.com/vardumper"
+        },
+        {
+            "type": "custom",
+            "url": "https://www.patreon.com/vardumper"
+        }
+    ]
 }
