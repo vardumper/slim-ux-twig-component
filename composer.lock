@@ -3309,16 +3309,16 @@
         },
         {
             "name": "vardumper/extended-htmldocument",
-            "version": "0.2.88",
+            "version": "0.2.101",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vardumper/extended-htmldocument.git",
-                "reference": "a0698025664564d8e65e04984232266ded996af8"
+                "reference": "309137a01420f2f671889b0d11fb3fc362823341"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vardumper/extended-htmldocument/zipball/a0698025664564d8e65e04984232266ded996af8",
-                "reference": "a0698025664564d8e65e04984232266ded996af8",
+                "url": "https://api.github.com/repos/vardumper/extended-htmldocument/zipball/309137a01420f2f671889b0d11fb3fc362823341",
+                "reference": "309137a01420f2f671889b0d11fb3fc362823341",
                 "shasum": ""
             },
             "require": {
@@ -3413,20 +3413,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-05-08T21:32:58+00:00"
+            "time": "2026-05-09T11:45:09+00:00"
         },
         {
             "name": "vardumper/html5-twig-component-bundle",
-            "version": "0.2.83",
+            "version": "0.2.101",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vardumper/html5-twig-component-bundle.git",
-                "reference": "f4da3718e2de09df517c841d9d54f71a75aa9fcd"
+                "reference": "6ce4cc98537158f3ade5035cddd4f1400d8b8694"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vardumper/html5-twig-component-bundle/zipball/f4da3718e2de09df517c841d9d54f71a75aa9fcd",
-                "reference": "f4da3718e2de09df517c841d9d54f71a75aa9fcd",
+                "url": "https://api.github.com/repos/vardumper/html5-twig-component-bundle/zipball/6ce4cc98537158f3ade5035cddd4f1400d8b8694",
+                "reference": "6ce4cc98537158f3ade5035cddd4f1400d8b8694",
                 "shasum": ""
             },
             "require": {
@@ -3435,6 +3435,16 @@
                 "symfony/twig-bundle": "^5.4|^6.0|^7.0|^8.0.4",
                 "symfony/ux-twig-component": "^2.33",
                 "vardumper/extended-htmldocument": "^0.2.82"
+            },
+            "require-dev": {
+                "brainmaestro/composer-git-hooks": "@dev",
+                "friendsofphp/php-cs-fixer": "^3.95.1",
+                "pestphp/pest": "^4.6.2",
+                "phpmd/phpmd": "^2.15",
+                "phpstan/phpstan": "^1.12.33",
+                "phpunit/phpunit": "^12.5.22",
+                "rector/swiss-knife": "^2.3.5",
+                "symplify/easy-coding-standard": "^12.6.2"
             },
             "type": "symfony-bundle",
             "extra": {
@@ -3467,23 +3477,26 @@
                 "twig"
             ],
             "support": {
-                "source": "https://github.com/vardumper/html5-twig-component-bundle/tree/0.2.83"
+                "docs": "https://vardumper.github.io/extended-htmldocument/",
+                "issues": "https://github.com/vardumper/extended-htmldocument/issues",
+                "security": "https://github.com/vardumper/extended-htmldocument/security/dependabot",
+                "source": "https://github.com/vardumper/html5-twig-component-bundle"
             },
             "funding": [
                 {
                     "url": "https://www.buymeacoffee.com/vardumper",
-                    "type": "buy_me_a_coffee"
+                    "type": "buymeacoffee"
                 },
                 {
-                    "url": "https://paypal.me/vardumper",
+                    "url": "https://www.patreon.com/vardumper",
                     "type": "custom"
                 },
                 {
-                    "url": "https://github.com/vardumper",
+                    "url": "https://github.com/sponsors/vardumper",
                     "type": "github"
                 }
             ],
-            "time": "2026-03-22T09:14:23+00:00"
+            "time": "2026-05-09T11:45:48+00:00"
         }
     ],
     "packages-dev": [
