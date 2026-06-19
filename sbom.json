@@ -3568,7 +3568,7 @@
       "properties": [
         {
           "name": "aquasecurity:trivy:PkgID",
-          "value": "slim/slim@4.15.1"
+          "value": "slim/slim@4.15.2"
         },
         {
           "name": "aquasecurity:trivy:PkgType",
