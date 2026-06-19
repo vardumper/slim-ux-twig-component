@@ -3587,10 +3587,10 @@
       ]
     },
     {
-      "bom-ref": "pkg:composer/slim/slim@4.15.1",
+      "bom-ref": "pkg:composer/slim/slim@4.15.2",
       "type": "library",
       "name": "slim/slim",
-      "version": "4.15.1",
+      "version": "4.15.2",
       "licenses": [
         {
           "license": {
@@ -3598,11 +3598,11 @@
           }
         }
       ],
-      "purl": "pkg:composer/slim/slim@4.15.1",
+      "purl": "pkg:composer/slim/slim@4.15.2",
       "properties": [
         {
           "name": "aquasecurity:trivy:PkgID",
-          "value": "slim/slim@4.15.1"
+          "value": "slim/slim@4.15.2"
         },
         {
           "name": "aquasecurity:trivy:PkgType",
@@ -14018,7 +14018,7 @@
         "pkg:composer/phpmd/phpmd@2.15.0",
         "pkg:composer/phpstan/phpstan@2.1.55",
         "pkg:composer/rector/swiss-knife@2.4.1",
-        "pkg:composer/slim/slim@4.15.1",
+        "pkg:composer/slim/slim@4.15.2",
         "pkg:composer/slim/twig-view@3.4.1",
         "pkg:composer/symfony/options-resolver@v8.0.8",
         "pkg:composer/symfony/ux-twig-component@v2.35.0",
@@ -14847,7 +14847,7 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:composer/slim/slim@4.15.1",
+      "ref": "pkg:composer/slim/slim@4.15.2",
       "dependsOn": [
         "pkg:composer/nikic/fast-route@v1.3.0",
         "pkg:composer/psr/container@2.0.2",
@@ -14862,7 +14862,7 @@
       "ref": "pkg:composer/slim/twig-view@3.4.1",
       "dependsOn": [
         "pkg:composer/psr/http-message@2.0",
-        "pkg:composer/slim/slim@4.15.1",
+        "pkg:composer/slim/slim@4.15.2",
         "pkg:composer/symfony/polyfill-php81@v1.37.0",
         "pkg:composer/twig/twig@v3.24.0"
       ]
